@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Test Request</title>
+</head>
+<body>
+    <h2>New Test Request</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h3>Client Info</h3>
+        {{ client_form.as_p }}
+
+        <h3>Samples</h3>
+        {{ sample_formset.management_form }}
+        {% for form in sample_formset %}
+            <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+                {{ form.as_p }}
+            </div>
+        {% endfor %}
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

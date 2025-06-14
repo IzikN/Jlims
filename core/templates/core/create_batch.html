@@ -1,0 +1,14 @@
+<div class="stats">
+    <h3>Lab Summary</h3>
+    <ul>
+        <li>Total Samples: {{ total_samples }}</li>
+        <li>Tests Completed: {{ completed_tests }}</li>
+        <li>Pending Tests: {{ pending_tests }}</li>
+        <li>Equipment Status:</li>
+        <ul>
+            {% for e in equipment_status %}
+                <li>{{ e.status }}: {{ e.count }}</li>
+            {% endfor %}
+        </ul>
+    </ul>
+</div>

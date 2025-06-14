@@ -1,0 +1,8 @@
+<h2>Assign Test for Sample: {{ sample.sample_id }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Assign Test</button>
+</form>

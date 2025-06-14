@@ -1,0 +1,36 @@
+<h2>Analyst Dashboard</h2>
+
+<h3>My Assignments</h3>
+<ul>
+    {% for assign in assignments %}
+        <li>
+            Sample: {{ assign.sample.sample_id }} |
+            Parameter: {{ assign.parameter.name }} |
+            Status: {{ assign.status }}
+            <!-- Add link to submit result if needed -->
+      </li>
+        <li>
+    {{ assign.sample.sample_id }} - {{ assign.parameter.name }} -
+    Status: {{ assign.status }}
+    {% if assign.status == 'Pending' %}
+        <a href="{% url 'submit_result' assign.id %}">Submit Result</a>
+    {% else %}
+        (Submitted)
+    {% endif %}
+        </li>
+    {% endfor %}
+<div class="stats">
+    <h3>Lab Summary</h3>
+    <ul>
+        <li>Total Samples: {{ total_samples }}</li>
+        <li>Tests Completed: {{ completed_tests }}</li>
+        <li>Pending Tests: {{ pending_tests }}</li>
+        <li>Equipment Status:</li>
+        <ul>
+            {% for e in equipment_status %}
+                <li>{{ e.status }}: {{ e.count }}</li>
+            {% endfor %}
+        </ul>
+    </ul>
+</div>
+</ul>

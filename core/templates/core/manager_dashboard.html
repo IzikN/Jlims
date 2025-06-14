@@ -1,0 +1,29 @@
+<h2>Manager Dashboard</h2>
+<a href="{% url 'create_batch' %}">+ New Batch</a>
+<a href="{% url 'create_worksheet' %}">+ New Worksheet</a>
+<h3>Clients & Samples</h3>
+{% for client in clients %}
+    <h4>{{ client.client_id }} - {{ client.name }}</h4>
+    <ul>
+        {% for sample in client.sample_set.all %}
+            <li>
+                {{ sample.sample_id }} - {{ sample.nature_of_sample }} - {{ sample.weight }}g
+                <a href="{% url 'assign_test' sample.sample_id %}">Assign Test</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endfor %}
+<div class="stats">
+    <h3>Lab Summary</h3>
+    <ul>
+        <li>Total Samples: {{ total_samples }}</li>
+        <li>Tests Completed: {{ completed_tests }}</li>
+        <li>Pending Tests: {{ pending_tests }}</li>
+        <li>Equipment Status:</li>
+        <ul>
+            {% for e in equipment_status %}
+                <li>{{ e.status }}: {{ e.count }}</li>
+            {% endfor %}
+        </ul>
+    </ul>
+</div>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<button onclick="window.print()">Print / Save as PDF</button>
+<head>
+    <title>Certificate of Analysis</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        h2, h4 { text-align: center; }
+    </style>
+</head>
+<body>
+    <h2>JaaGee Lab Certificate of Analysis</h2>
+    <h4>Client: {{ client.name }} | Organization: {{ client.organization }}</h4>
+
+    {% for item in results %}
+        <h4>Sample ID: {{ item.sample.sample_id }}</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Result</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in item.assignments %}
+                    <tr>
+                        <td>{{ test.parameter.name }}</td>
+                        <td>{{ test.result }}</td>
+                        <td>% or mg/kg</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+
+    <p><strong>Authorized by:</strong> ______________________</p>
+    <p><strong>Date:</strong> {{ now|date:"F d, Y" }}</p>
+</body>
+</html>

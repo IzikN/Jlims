@@ -1,0 +1,10 @@
+<h2>Submit Result</h2>
+
+<p><strong>Sample ID:</strong> {{ assignment.sample.sample_id }}</p>
+<p><strong>Parameter:</strong> {{ assignment.parameter.name }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Result</button>
+</form>

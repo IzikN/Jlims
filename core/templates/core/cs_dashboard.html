@@ -1,0 +1,10 @@
+<h2>Customer Service Dashboard</h2>
+
+<a href="{% url 'create_test_request' %}">+ New Test Request</a>
+
+<h3>Recent Clients</h3>
+<ul>
+    {% for client in clients %}
+        <li>{{ client.client_id }} - {{ client.name }} ({{ client.date_received }})</li>
+    {% endfor %}
+</ul>
