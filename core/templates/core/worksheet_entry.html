@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Worksheet Entry: {{ worksheet.title }}</h2>
+<form method="post">
+  {% csrf_token %}
+  <table>
+    <tr><th>Sample</th><th>Parameter</th><th>Value</th><th>Unit</th><th>Method</th></tr>
+    {% for assignment in assignments %}
+    <tr>
+      <td>{{ assignment.sample.sample_id }}</td>
+      <td>{{ assignment.parameter.name }}</td>
+      <td><input type="text" name="value_{{ assignment.id }}" required></td>
+      <td><input type="text" name="unit_{{ assignment.id }}" required></td>
+      <td><input type="text" name="method_{{ assignment.id }}" required></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <button type="submit">Submit Results</button>
+</form>
+{% endblock %}

@@ -1,10 +1,89 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div class="text-center">
-    <h2 class="text-3xl font-bold mb-4">Welcome to JaaGee Laboratory LIMS</h2>
-    <p class="text-lg">Manage your samples, tests, equipment, and results with ease.</p>
-    {% if not user.is_authenticated %}
-        <a href="{% url 'login' %}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">Login</a>
-    {% endif %}
+<div class="bg-gradient-to-b from-blue-50 to-white min-h-screen flex items-center justify-center py-12">
+    <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-2xl text-center">
+        <!-- Logo Placeholder -->
+        <img src="{% static 'images/logo.jpg' %}" alt="JaaGee Laboratory Logo" class="mx-auto h-20 mb-6" />
+
+        <!-- Header -->
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4">JaaGee Laboratory LIMS</h1>
+        <p class="text-xl text-gray-600 mb-8">Your Trusted Partner in Food and Feed Analysis</p>
+
+        <!-- Certification Badge -->
+        <div class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            ISO/IEC 17025:2017 Certified Laboratory
+        </div>
+
+        <!-- Introduction -->
+        <p class="text-lg text-gray-700 mb-10 leading-relaxed">
+            At JaaGee Laboratory, we deliver precise, reliable, and timely analytical services for food and feed industries. 
+            Our state-of-the-art facilities and expert team ensure compliance with global standards, empowering our clients with confidence in their results.
+        </p>
+
+        <!-- Scope of Services -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-xl font-semibold text-blue-800 mb-2">Current Scope</h3>
+                <ul class="text-gray-600 text-left list-disc list-inside">
+                    <li>Protein Analysis</li>
+                    <li>Ash Content</li>
+                    <li>Moisture Determination</li>
+                    <li>Fiber Analysis</li>
+                    <li>Fat Content</li>
+                    <li>Gross Energy</li>
+                    <li>Aflatoxin Testing</li>
+                    <li>Vitamin Analysis</li>
+                </ul>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-xl font-semibold text-blue-800 mb-2">Future Scope Expansion</h3>
+                <ul class="text-gray-600 text-left list-disc list-inside">
+                    <li>Water Quality Testing</li>
+                    <li>Microbial Analysis</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Call to Action Links -->
+        <div class="flex justify-center gap-6 mb-10">
+            <a href="{% url 'client_results' token=sample.token %}
+" class="text-blue-700 font-semibold hover:text-blue-900 transition duration-300">
+                View Your Results
+            </a>
+            <span class="text-gray-400">|</span>
+            <a href="{% url 'login' %}" class="text-blue-700 font-semibold hover:text-blue-900 transition duration-300">
+                Staff Login
+            </a>
+        </div>
+
+        <!-- Why Choose Us -->
+        <div class="bg-blue-900 text-white p-8 rounded-lg">
+            <h2 class="text-2xl font-bold mb-4">Why Choose JaaGee Laboratory?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <h4 class="font-semibold mb-2">Accredited Excellence</h4>
+                    <p class="text-sm">ISO 17025 certification ensures our results meet international standards.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">Cutting-Edge Technology</h4>
+                    <p class="text-sm">Advanced equipment for precise and reliable analysis.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">Expert Team</h4>
+                    <p class="text-sm">Highly trained professionals dedicated to quality and service.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <p class="text-gray-500 text-sm mt-10">
+            &copy; 2025 JaaGee Laboratory. All rights reserved.
+        </p>
+    </div>
 </div>
+
+<!-- Tailwind CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 {% endblock %}

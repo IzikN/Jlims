@@ -1,29 +1,104 @@
-<h2>Manager Dashboard</h2>
-<a href="{% url 'create_batch' %}">+ New Batch</a>
-<a href="{% url 'create_worksheet' %}">+ New Worksheet</a>
-<h3>Clients & Samples</h3>
-{% for client in clients %}
-    <h4>{{ client.client_id }} - {{ client.name }}</h4>
-    <ul>
-        {% for sample in client.sample_set.all %}
-            <li>
-                {{ sample.sample_id }} - {{ sample.nature_of_sample }} - {{ sample.weight }}g
-                <a href="{% url 'assign_test' sample.sample_id %}">Assign Test</a>
-            </li>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-6">
+    <h2 class="text-2xl font-bold mb-6">Manager Dashboard</h2>
+
+    <!-- Quick Actions -->
+    <div class="flex flex-wrap gap-4 mb-8">
+        <a href="{% url 'create_batch' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ New Batch</a>
+        <a href="{% url 'batch_list' %}" class="bg-blue-100 text-blue-800 px-4 py-2 rounded hover:bg-blue-200">Batch List</a>
+        <a href="{% url 'create_worksheet' %}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">+ New Worksheet</a>
+        <a href="{% url 'worksheet_list' %}" class="bg-green-100 text-green-800 px-4 py-2 rounded hover:bg-green-200">Worksheet List</a>
+        <a href="{% url 'view_coa' client_id=1 %}" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">View COA</a>
+        <a href="{% url 'statistics_dashboard' %}" 
+   class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mt-4">
+   📊 View Statistics
+</a>
+
+    </div>
+
+    <!-- Clients & Samples Section -->
+    <div class="mb-10">
+        <h3 class="text-xl font-semibold mb-4">Clients & Samples</h3>
+        {% for client in clients %}
+            <div class="bg-white shadow p-4 mb-4 rounded">
+                <h4 class="text-lg font-medium">{{ client.client_id }} - {{ client.name }}</h4>
+                <ul class="ml-4 mt-2">
+                    {% for sample in client.samples.all %}
+                        <li class="border-b py-2">
+                            <span class="font-semibold">{{ sample.sample_id }}</span> —
+                            {{ sample.nature_of_sample }} —
+                            {{ sample.weight }}g
+
+                            {% if sample.testassignment_set.count == 0 %}
+                                <a href="{% url 'assign_test' sample.sample_id %}" class="ml-4 text-blue-600 hover:underline">Assign Test</a>
+                            {% else %}
+                                <span class="ml-4 text-green-600 font-semibold">Test Assigned</span>
+                            {% endif %}
+
+                            {% if sample.batch %}
+                                <a href="{% url 'batch_detail' sample.batch.id %}" class="ml-4 text-purple-600 hover:underline">View Batch QC</a>
+                            {% else %}
+                                <span class="ml-4 text-gray-500 italic">No Batch</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% empty %}
+            <p>No clients found.</p>
         {% endfor %}
-    </ul>
-{% endfor %}
-<div class="stats">
-    <h3>Lab Summary</h3>
-    <ul>
-        <li>Total Samples: {{ total_samples }}</li>
-        <li>Tests Completed: {{ completed_tests }}</li>
-        <li>Pending Tests: {{ pending_tests }}</li>
-        <li>Equipment Status:</li>
-        <ul>
-            {% for e in equipment_status %}
-                <li>{{ e.status }}: {{ e.count }}</li>
-            {% endfor %}
+    </div>
+
+    <!-- Lab Summary -->
+    <div class="bg-white shadow p-4 mb-8 rounded">
+        <h3 class="text-xl font-semibold mb-4">Lab Summary</h3>
+        <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <li class="bg-blue-100 p-3 rounded">🧪 Total Samples: <strong>{{ total_samples }}</strong></li>
+            <li class="bg-green-100 p-3 rounded">✅ Tests Completed: <strong>{{ completed_tests }}</strong></li>
+            <li class="bg-yellow-100 p-3 rounded">⏳ Pending Tests: <strong>{{ pending_tests }}</strong></li>
         </ul>
-    </ul>
+        <div class="mt-4">
+            <h4 class="font-semibold">Equipment Status:</h4>
+            <ul class="ml-4 list-disc">
+                {% for e in equipment_status %}
+                    <li>{{ e.status }}: <strong>{{ e.count }}</strong></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Audit Trail -->
+    <div class="bg-white shadow p-4 rounded">
+        <h3 class="text-xl font-semibold mb-4">Recent Activities</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border rounded text-sm">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="py-2 px-4 border">User</th>
+                        <th class="py-2 px-4 border">Action</th>
+                        <th class="py-2 px-4 border">Details</th>
+                        <th class="py-2 px-4 border">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for audit in audit_trails %}
+                        <tr class="hover:bg-gray-100">
+                            <td class="py-2 px-4 border">{{ audit.user.username }}</td>
+                            <td class="py-2 px-4 border">{{ audit.action }}</td>
+                            <td class="py-2 px-4 border">{{ audit.details }}</td>
+                            <td class="py-2 px-4 border">{{ audit.timestamp|date:"d M Y H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="py-4 text-center text-gray-500">No audit trail records found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+{% endblock %}

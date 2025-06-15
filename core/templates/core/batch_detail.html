@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Batch: {{ batch.name }}</h2>
+
+<div class="mb-3">
+  <p><strong>Samples:</strong> {{ samples.count }}</p>
+  <p><strong>QC Complete:</strong> {{ qc_complete|yesno:"Yes,No" }}</p>
+  <p><strong>Controls:</strong> {{ controls }}</p>
+  <p><strong>Duplicates:</strong> {{ duplicates }}</p>
+</div>
+
+<!-- Progress bar -->
+<div class="progress mb-4">
+  <div class="progress-bar bg-success" role="progressbar" style="width: {{ completion_rate }}%;" aria-valuenow="{{ completion_rate }}" aria-valuemin="0" aria-valuemax="100">
+    {{ completion_rate }}% Complete
+  </div>
+</div>
+
+<!-- Sample Details Table -->
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Sample ID</th>
+      <th>Nature of Sample</th>
+      <th>Status</th>
+      <th>Assigned Tests</th>
+      <th>Results</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in sample_data %}
+    <tr>
+      <td>{{ item.sample.sample_id }}</td>
+      <td>{{ item.sample.nature_of_sample }}</td>
+      <td>{{ item.sample.status }}</td>
+      <td>
+        <ul>
+          {% for assignment in item.assignments %}
+          <li>{{ assignment.parameter.name }} – {{ assignment.status }}</li>
+          {% endfor %}
+        </ul>
+      </td>
+      <td>
+        <ul>
+          {% for assignment in item.assignments %}
+          <li>
+            {% if assignment.testresult %}
+              {{ assignment.testresult.value }} {{ assignment.testresult.unit }} ({{ assignment.testresult.method }})
+            {% else %}
+              <em>Pending</em>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

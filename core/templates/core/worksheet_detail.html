@@ -1,0 +1,33 @@
+<table>
+    <thead>
+        <tr>
+            <th>Sample ID</th>
+            <th>Client</th>
+            <th>Parameter</th>
+            <th>Result</th>
+            <th>QC Flag</th>
+            <th>Range Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in worksheet.test_results.all %}
+        <tr>
+            <td>{{ result.assignment.sample.sample_id }}</td>
+            <td>{{ result.assignment.sample.client.client_id }}</td>
+            <td>{{ result.assignment.parameter.name }}</td>
+            <td>{{ result.value }} {{ result.unit }}</td>
+            <td>{{ result.assignment.sample.qc_flag }}</td>
+            <td>
+                {% if result.in_range %}
+                    ✅ In Range
+                {% elif result.in_range == False %}
+                    ⚠️ Out of Range
+                {% else %}
+                    ❓ No Range Set
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+ <a href="{% url 'worksheet_list' %}" class="btn btn-secondary mt-3">Back to Worksheet List</a>

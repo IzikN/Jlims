@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-blue-800">Worksheets</h2>
+    <a href="{% url 'create_worksheet' %}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+      + Create New Worksheet
+    </a>
+  </div>
+
+  {% if worksheets %}
+    <div class="space-y-6">
+      {% for worksheet in worksheets %}
+        <div class="bg-white p-4 rounded shadow border">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-700">{{ worksheet.title }}</h3>
+            <div class="space-x-4">
+              <a href="{% url 'worksheet_detail' worksheet.id %}" class="text-blue-600 hover:underline">🔍 View</a>
+              <a href="{% url 'worksheet_pdf' worksheet.id %}" class="text-gray-700 hover:text-black">📄 Export as PDF</a>
+            </div>
+          </div>
+
+          {% if worksheet.assignments.exists %}
+            <div class="overflow-x-auto mt-4">
+              <table class="min-w-full table-auto border mt-2 text-sm">
+                <thead class="bg-gray-200 text-gray-700">
+                  <tr>
+                    <th class="border px-3 py-2">Sample ID</th>
+                    <th class="border px-3 py-2">Parameter</th>
+                    <th class="border px-3 py-2">Assigned Analyst</th>
+                    <th class="border px-3 py-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for assign in worksheet.assignments.all %}
+                    <tr class="hover:bg-gray-50">
+                      <td class="border px-3 py-2">{{ assign.sample.sample_id }}</td>
+                      <td class="border px-3 py-2">{{ assign.parameter.name }}</td>
+                      <td class="border px-3 py-2">
+                        {% if assign.analyst %}
+                          <span class="text-green-700 font-medium">✔ {{ assign.analyst.username }}</span>
+                        {% else %}
+                          <span class="text-red-600 font-medium">❌ Not Assigned</span>
+                        {% endif %}
+                      </td>
+                      <td class="border px-3 py-2">
+                        {% if assign.status == 'Completed' %}
+                          <span class="text-green-600 font-semibold">🧪 Result Submitted</span>
+                        {% else %}
+                          <span class="text-yellow-600 font-semibold">⏳ Pending</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-sm text-gray-500 mt-2">No test assignments yet for this worksheet.</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-500 mt-8">No worksheets found yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

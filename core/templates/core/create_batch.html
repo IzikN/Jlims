@@ -1,14 +1,81 @@
-<div class="stats">
-    <h3>Lab Summary</h3>
-    <ul>
-        <li>Total Samples: {{ total_samples }}</li>
-        <li>Tests Completed: {{ completed_tests }}</li>
-        <li>Pending Tests: {{ pending_tests }}</li>
-        <li>Equipment Status:</li>
-        <ul>
-            {% for e in equipment_status %}
-                <li>{{ e.status }}: {{ e.count }}</li>
-            {% endfor %}
-        </ul>
-    </ul>
-</div>
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    form {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    select, input, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<h2 style="text-align: center;">Create Batch</h2>
+
+<form method="post" id="batchForm">
+    {% csrf_token %}
+    
+    <label for="id_parameter">Parameter:</label>
+    {{ form.parameter }}
+    
+    <label for="id_samples">Matching Samples:</label>
+    {{ form.samples }}
+    
+    <button type="submit">Create</button>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const paramField = document.getElementById("id_parameter");
+    const sampleField = document.getElementById("id_samples");
+
+    paramField.addEventListener("change", function () {
+        const paramId = this.value;
+        if (!paramId) return;
+
+        fetch(`/ajax/get-samples/?parameter_id=${paramId}`)
+            .then(response => response.json())
+            .then(data => {
+                sampleField.innerHTML = "";
+                data.forEach(sample => {
+                    const option = document.createElement("option");
+                    option.value = sample.id;
+                    option.textContent = sample.sample_id;
+                    sampleField.appendChild(option);
+                });
+            });
+    });
+});
+</script>
+
+{% endblock %}

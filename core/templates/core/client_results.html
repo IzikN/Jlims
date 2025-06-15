@@ -1,0 +1,17 @@
+<h2>Results for {{ client.name }} ({{ client.client_id }})</h2>
+
+{% for sample in samples %}
+    <h4>{{ sample.sample_id }}</h4>
+    <ul>
+        {% for assignment in sample.testassignment_set.all %}
+            <li>
+                {{ assignment.parameter.name }}: 
+                {% if assignment.testresult %}
+                    {{ assignment.testresult.value }}{{ assignment.testresult.unit }}
+                {% else %}
+                    Pending
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endfor %}

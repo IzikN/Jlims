@@ -1,0 +1,187 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Dashboard - JaaGee Laboratory LIMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-blue-900">📊 Statistics Dashboard</h1>
+            <img src="{% static 'images/jaagee-logo.png' %}" alt="JaaGee Laboratory Logo" class="h-12" />
+        </div>
+
+        <!-- Filter Form -->
+        <form id="filterForm" method="get" class="flex flex-col sm:flex-row gap-4 mb-8">
+            <input type="date" name="start_date" value="{{ start_date }}" class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-600">
+            <input type="date" name="end_date" value="{{ end_date }}" class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-600">
+            <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition duration-300">Filter</button>
+        </form>
+
+        <!-- Key Metrics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center mb-8">
+            <div class="bg-blue-100 p-6 rounded-lg shadow hover:shadow-md transition">
+                <h3 class="text-lg font-semibold text-blue-800">Total Samples</h3>
+                <p class="text-2xl font-bold text-gray-900">{{ total_samples }}</p>
+            </div>
+            <div class="bg-green-100 p-6 rounded-lg shadow hover:shadow-md transition">
+                <h3 class="text-lg font-semibold text-green-800">Total Revenue</h3>
+                <p class="text-2xl font-bold text-gray-900">₦{{ total_amount|intcomma }}</p>
+            </div>
+            <div class="bg-yellow-100 p-6 rounded-lg shadow hover:shadow-md transition">
+                <h3 class="text-lg font-semibold text-yellow-800">Top Client</h3>
+                <p class="text-md font-bold text-gray-900">
+                    {% if top_clients %} {{ top_clients.0.name }} (₦{{ top_clients.0.total|intcomma }}){% else %}N/A{% endif %}
+                </p>
+            </div>
+            <div class="bg-red-100 p-6 rounded-lg shadow hover:shadow-md transition">
+                <h3 class="text-lg font-semibold text-red-800">Highest Week</h3>
+                <p class="text-md font-bold text-gray-900">
+                    {% if highest_week %} Week {{ highest_week.week }}: ₦{{ highest_week.total|intcomma }} {% else %}N/A{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Weekly Revenue Chart -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📈 Weekly Revenue</h2>
+                ```chartjs
+                {
+                    "type": "bar",
+                    "data": {
+                        "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+                        "datasets": [{
+                            "label": "Revenue (₦)",
+                            "data": [{% for week in weekly_data %}{{ week.total }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                            "backgroundColor": "rgba(59, 130, 246, 0.6)",
+                            "borderColor": "rgba(59, 130, 246, 1)",
+                            "borderWidth": 1
+                        }]
+                    },
+                    "options": {
+                        "scales": {
+                            "y": {
+                                "beginAtZero": true,
+                                "title": {
+                                    "display": true,
+                                    "text": "Revenue (₦)"
+                                }
+                            },
+                            "x": {
+                                "title": {
+                                    "display": true,
+                                    "text": "Week"
+                                }
+                            }
+                        },
+                        "plugins": {
+                            "legend": {
+                                "display": false
+                            }
+                        }
+                    }
+                }
+                ```
+            </div>
+
+            <!-- Top Clients Revenue Distribution -->
+            <div class="bg-gray-50 p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">🥧 Top Clients Revenue</h2>
+                ```chartjs
+                {
+                    "type": "pie",
+                    "data": {
+                        "labels": [{% for client in top_clients %}"{{ client.name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                        "datasets": [{
+                            "data": [{% for client in top_clients %}{{ client.total }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                            "backgroundColor": [
+                                "rgba(59, 130, 246, 0.8)",
+                                "rgba(16, 185, 129, 0.8)",
+                                "rgba(245, 158, 11, 0.8)",
+                                "rgba(239, 68, 68, 0.8)",
+                                "rgba(139, 92, 246, 0.8)"
+                            ],
+                            "borderColor": [
+                                "rgba(59, 130, 246, 1)",
+                                "rgba(16, 185, 129, 1)",
+                                "rgba(245, 158, 11, 1)",
+                                "rgba(239, 68, 68, 1)",
+                                "rgba(139, 92, 246, 1)"
+                            ],
+                            "borderWidth": 1
+                        }]
+                    },
+                    "options": {
+                        "plugins": {
+                            "legend": {
+                                "position": "bottom"
+                            }
+                        }
+                    }
+                }
+                ```
+            </div>
+        </div>
+
+        <!-- Top Clients List -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">🏅 Top Clients</h2>
+            <ul class="list-disc pl-6 text-gray-700">
+                {% for client in top_clients %}
+                    <li class="mb-2">{{ client.name }} — ₦{{ client.total|intcomma }}</li>
+                {% empty %}
+                    <li>No data available</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Highest Month -->
+        <div class="mt-6 text-gray-700">
+            {% if highest_month %}
+                <p><strong>📅 Month with Highest Revenue:</strong> Month {{ highest_month.month }} — ₦{{ highest_month.total|intcomma }}</p>
+            {% else %}
+                <p>No data available</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Date validation for filter form
+        document.getElementById('filterForm').addEventListener('submit', function (e) {
+            const startDate = new Date(document.querySelector('input[name="start_date"]').value);
+            const endDate = new Date(document.querySelector('input[name="end_date"]').value);
+            const today = new Date();
+
+            if (!startDate || !endDate) {
+                e.preventDefault();
+                alert('Please select both start and end dates.');
+                return;
+            }
+
+            if (startDate > endDate) {
+                e.preventDefault();
+                alert('Start date cannot be later than end date.');
+                return;
+            }
+
+            if (endDate > today) {
+                e.preventDefault();
+                alert('End date cannot be in the future.');
+                return;
+            }
+        });
+
+        // Smooth scroll to charts on page load
+        window.addEventListener('load', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

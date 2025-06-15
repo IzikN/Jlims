@@ -1,26 +1,141 @@
+{% load widget_tweaks %}
+
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Submit Test Request</title>
+  <meta charset="UTF-8">
+  <title>Submit Test Request | JaaGee LIMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h2>New Test Request</h2>
+<body class="bg-gray-100 min-h-screen">
 
-    <form method="post">
-        {% csrf_token %}
+<div class="max-w-6xl mx-auto py-10 px-4">
+  <h2 class="text-3xl font-bold text-blue-800 mb-6">🧾 Submit New Test Request</h2>
 
-        <h3>Client Info</h3>
-        {{ client_form.as_p }}
+  <form id="test-request-form" method="post" class="bg-white p-6 rounded shadow space-y-8">
+    {% csrf_token %}
 
-        <h3>Samples</h3>
-        {{ sample_formset.management_form }}
-        {% for form in sample_formset %}
-            <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-                {{ form.as_p }}
-            </div>
-        {% endfor %}
+    <!-- Client Info -->
+    <fieldset class="border p-4 rounded-md border-gray-300">
+      <legend class="text-lg font-semibold text-gray-700">Client Information</legend>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+       {% for field in client_form %}
+  <div>
+    {{ field.label_tag }}
+    {{ field|add_class:"border border-gray-300 rounded px-3 py-2 w-full" }}
+    {% if field.errors %}
+      <p class="text-red-500 text-sm">{{ field.errors|join:", " }}</p>
+    {% endif %}
+  </div>
+{% endfor %}
 
-        <button type="submit">Submit</button>
-    </form>
+      </div>
+    </fieldset>
+
+    <!-- Samples -->
+    <div>
+      <button type="button" id="add-sample-btn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        + Add Sample
+      </button>
+      <div id="samples-container" class="space-y-6 mt-6"></div>
+    </div>
+
+    <!-- Total -->
+    <div class="text-right text-lg font-bold text-blue-700">
+      Total Price: ₦<span id="grand-total">0</span>
+    </div>
+
+    <div class="text-right">
+      <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800">Submit</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  let sampleIdx = 0;
+
+  document.getElementById('add-sample-btn').addEventListener('click', () => {
+    sampleIdx++;
+    const container = document.getElementById('samples-container');
+    const div = document.createElement('div');
+    div.className = 'border border-gray-300 p-4 rounded bg-gray-50';
+
+    div.innerHTML = `
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="text-lg font-semibold">Sample ${sampleIdx}</h4>
+        <button type="button" class="text-red-600 font-semibold hover:underline remove-sample">Remove</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <input name="sample_${sampleIdx}_sample_id" placeholder="Sample ID" required class="border px-3 py-2 rounded w-full" />
+        <input name="sample_${sampleIdx}_nature_of_sample" placeholder="Nature of Sample" class="border px-3 py-2 rounded w-full" />
+        <input name="sample_${sampleIdx}_weight" placeholder="Weight (g)" class="border px-3 py-2 rounded w-full" />
+        <input name="sample_${sampleIdx}_parameter" placeholder="Custom Parameter (e.g. Protein)" class="border px-3 py-2 rounded w-full" />
+      </div>
+      <div class="parameters-container" id="params_${sampleIdx}">
+        <em class="text-gray-500">Loading test parameters...</em>
+      </div>
+    `;
+    container.appendChild(div);
+
+    fetch("{% url 'api_get_test_parameters' %}")
+      .then(r => r.json())
+      .then(data => renderParameterGroup(data, `params_${sampleIdx}`));
+
+    div.querySelector('.remove-sample').onclick = () => {
+      div.remove();
+      updateGrandTotal();
+    };
+  });
+
+  function renderParameterGroup(data, containerId) {
+    const cont = document.getElementById(containerId);
+    cont.innerHTML = "";
+
+    data.forEach((grp, i) => {
+      const groupId = `${containerId}_${i}`;
+      const groupLabel = document.createElement('div');
+      groupLabel.innerHTML = `
+        <label class="block font-medium text-gray-700 mt-3">
+          <input type="checkbox" class="type-toggle mr-2" data-group="${groupId}">
+          <span class="text-blue-800 font-semibold">${grp.test_type}</span>
+        </label>`;
+      cont.appendChild(groupLabel);
+
+      grp.parameters.forEach(p => {
+        const checkbox = document.createElement('div');
+        checkbox.innerHTML = `
+          <label class="block ml-6 text-sm">
+            <input type="checkbox" name="${containerId}_param" value="${p.id}"
+                   data-price="${p.price}" data-group="${groupId}" class="mr-2">
+            ${p.name} <span class="text-green-700">(₦${p.price})</span>
+          </label>`;
+        cont.appendChild(checkbox);
+      });
+    });
+
+    cont.querySelectorAll('.type-toggle').forEach(toggle => {
+      toggle.addEventListener('change', e => {
+        const grp = e.target.dataset.group;
+        cont.querySelectorAll(`input[data-group="${grp}"]`)
+          .forEach(cb => cb.checked = e.target.checked);
+        updateGrandTotal();
+      });
+    });
+
+    cont.querySelectorAll(`input[name$="_param"]`).forEach(cb => {
+      cb.addEventListener('change', updateGrandTotal);
+    });
+  }
+
+  function updateGrandTotal() {
+    let total = 0;
+    document.querySelectorAll('input[name$="_param"]').forEach(cb => {
+      if (cb.checked) total += parseFloat(cb.dataset.price);
+    });
+    document.getElementById('grand-total').innerText = total.toLocaleString();
+  }
+</script>
+
 </body>
 </html>

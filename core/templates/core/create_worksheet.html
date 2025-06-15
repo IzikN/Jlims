@@ -1,6 +1,37 @@
-<h2>Create Worksheet</h2>
-<form method="post">
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Create Worksheet</h2>
+  <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.title.label_tag }} {{ form.title }}
+    {{ form.test_parameter.label_tag }} {{ form.test_parameter }}
+
+    <div id="assignment-container">
+      {{ form.assignments.label_tag }}
+      {% for checkbox in form.assignments %}
+        <div>{{ checkbox }}</div>
+      {% endfor %}
+    </div>
+
     <button type="submit">Create</button>
-</form>
+  </form>
+
+  <script>
+    document.getElementById("id_test_parameter").addEventListener("change", function() {
+      const parameterId = this.value;
+      fetch(`/worksheet/filter-assignments/?parameter_id=${parameterId}`)
+        .then(response => response.json())
+        .then(data => {
+          const container = document.getElementById("assignment-container");
+          container.innerHTML = '<label for="id_assignments">Assignments</label>';
+          data.assignments.forEach(a => {
+            container.innerHTML += `
+              <div>
+                <input type="checkbox" name="assignments" value="${a.id}" id="id_assignments_${a.id}">
+                <label for="id_assignments_${a.id}">${a.label}</label>
+              </div>`;
+          });
+        });
+    });
+  </script>
+{% endblock %}

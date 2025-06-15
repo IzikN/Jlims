@@ -1,0 +1,29 @@
+<h2>Edit Worksheet: {{ worksheet.title }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <th>Sample ID</th>
+            <th>Parameter</th>
+            <th>Assign Analyst</th>
+        </tr>
+        {% for assignment in assignments %}
+        <tr>
+            <td>{{ assignment.sample.sample_id }}</td>
+            <td>{{ assignment.parameter.name }}</td>
+            <td>
+                <select name="assignment_{{ assignment.id }}">
+                    <option value="">-- Select Analyst --</option>
+                    {% for analyst in analysts %}
+                        <option value="{{ analyst.id }}"
+                            {% if assignment.assigned_to == analyst %}selected{% endif %}>
+                            {{ analyst.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit">Save Assignments</button>
+</form>

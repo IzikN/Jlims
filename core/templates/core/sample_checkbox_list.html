@@ -1,0 +1,15 @@
+{% regroup samples by client.name as client_groups %}
+
+{% for group in client_groups %}
+  <div style="margin-bottom: 1em;">
+    <strong>Client: {{ group.grouper }}</strong><br>
+    {% for sample in group.list %}
+      <label>
+        <input type="checkbox" name="samples" value="{{ sample.id }}">
+        {{ sample.sample_id }} - {{ sample.nature }}
+      </label><br>
+    {% endfor %}
+  </div>
+{% empty %}
+  <p>No samples found for this parameter.</p>
+{% endfor %}

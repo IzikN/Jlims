@@ -8,8 +8,14 @@ class ClientAdmin(admin.ModelAdmin):
 
 @admin.register(Sample)
 class SampleAdmin(admin.ModelAdmin):
-    list_display = ['sample_id', 'client', 'status', 'weight']
+    list_display = ['sample_id', 'client', 'status', 'weight', 'qc_flag']
+    list_filter = ['qc_flag', 'status']
     search_fields = ['sample_id', 'client__client_id']
+
+@admin.register(ReferenceRange)
+class ReferenceRangeAdmin(admin.ModelAdmin):
+    list_display = ['parameter', 'min_value', 'max_value', 'unit']
+
 
 @admin.register(TestType)
 class TestTypeAdmin(admin.ModelAdmin):
@@ -26,14 +32,21 @@ class TestAssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(TestResult)
 class TestResultAdmin(admin.ModelAdmin):
-    list_display = ['assignment', 'value', 'unit', 'submitted_at']
+    list_display = ['assignment', 'value', 'unit', 'submitted_at', 'is_in_range']
+    readonly_fields = ['is_in_range']
+
+    def is_in_range(self, obj):
+        result = obj.in_range
+        if result is True:
+            return "✅ In Range"
+        elif result is False:
+            return "⚠️ Out of Range"
+        return "❓ No Range"
+    is_in_range.short_description = "Range Status"
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
     list_display = ['name', 'model_number', 'next_calibration', 'status']
-
-from django.contrib import admin
-from .models import EquipmentLog
 
 @admin.register(EquipmentLog)
 class EquipmentLogAdmin(admin.ModelAdmin):
@@ -50,3 +63,20 @@ class EquipmentLogAdmin(admin.ModelAdmin):
 @admin.register(Reagent)
 class ReagentAdmin(admin.ModelAdmin):
     list_display = ['name', 'quantity', 'unit', 'expiry_date']
+
+class SampleInline(admin.TabularInline):
+    model = Sample
+    extra = 0
+    fields = ['sample_id', 'nature_of_sample', 'weight', 'qc_flag']
+    readonly_fields = ['sample_id', 'nature_of_sample', 'weight', 'qc_flag']
+
+@admin.register(Batch)
+class BatchAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_by', 'created_at']
+    inlines = [SampleInline]  # ✅ shows related samples inline
+
+
+# admin.py
+class WorksheetAdmin(admin.ModelAdmin):
+    list_display = ('title', 'test_parameter', 'created_by', 'created_at')  # remove 'is_closed'
+    list_filter = ('test_parameter',)  # remove 'is_closed'

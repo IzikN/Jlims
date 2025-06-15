@@ -1,0 +1,23 @@
+<h1>Invoice</h1>
+<p>Invoice #: {{ invoice.invoice_number }}</p>
+<p>Client: {{ invoice.client.name }}</p>
+<p>Client ID: {{ invoice.client.client_id }}</p>
+<p>Date Issued: {{ invoice.date_issued }}</p>
+
+<table>
+    <tr>
+        <th>Sample ID</th>
+        <th>Number of Tests</th>
+        <th>Amount</th>
+    </tr>
+    {% for sample in invoice.client.samples.all %}
+        <tr>
+            <td>{{ sample.sample_id }}</td>
+            <td>{{ sample.testassignment_set.count }}</td>
+            <td>{{ sample.testassignment_set.count|multiply:5000 }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<p><strong>Total:</strong> ₦{{ invoice.total_amount }}</p>
+<p><strong>Paid:</strong> ₦{{ invoice.amount_paid }}</p>

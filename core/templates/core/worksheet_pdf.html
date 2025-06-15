@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Worksheet PDF</title>
+  <style>
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Worksheet: {{ worksheet.title }}</h2>
+  <p>Created by: {{ worksheet.created_by }}</p>
+  <table>
+    <tr><th>Sample ID</th><th>Parameter</th><th>Value</th><th>Unit</th><th>Method</th></tr>
+    {% for assignment in assignments %}
+    <tr>
+      <td>{{ assignment.sample.sample_id }}</td>
+      <td>{{ assignment.parameter.name }}</td>
+      <td>{{ assignment.testresult.value|default:'---' }}</td>
+      <td>{{ assignment.testresult.unit|default:'---' }}</td>
+      <td>{{ assignment.testresult.method|default:'---' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Sample Batches</h2>
+  <a href="{% url 'create_batch' %}">Create New Batch</a>
+  <ul>
+    {% for batch in batches %}
+      <li>
+        {{ batch.name }} | Created by {{ batch.created_by }} on {{ batch.created_at }}
+        <ul>
+          {% for sample in batch.samples.all %}
+            <li>{{ sample.sample_id }} ({{ sample.client.client_id }})</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% empty %}
+      <li>No batches created yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
