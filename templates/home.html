@@ -48,8 +48,9 @@
 
         <!-- Call to Action Links -->
         <div class="flex justify-center gap-6 mb-10">
-            <a href="{% url 'client_results' token=sample.token %}
-" class="text-blue-700 font-semibold hover:text-blue-900 transition duration-300">
+            {% comment %}
+<a href="{% url 'client_results' token=sample.token %}" class="text-blue-700 font-semibold hover:text-blue-900 transition duration-300">
+{% endcomment %}
                 View Your Results
             </a>
             <span class="text-gray-400">|</span>
