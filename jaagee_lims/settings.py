@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-_=^o*=9f+s@k7=hjz+oio1*c5d^p+m-jiyxh9r(&i2cfu0$app
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['jlims.onrender.com']
+ALLOWED_HOSTS = ['jlims.onrender.com', '127.0.0.1']
 
 
 # Application definition
@@ -42,9 +42,11 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django.contrib.humanize'
 ]
+
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,6 +138,8 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [ BASE_DIR / "static", ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
