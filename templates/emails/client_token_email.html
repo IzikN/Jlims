@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Client Portal Access</title>
+</head>
+<body style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; color: #333;">
+  <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <h2 style="color: #0056b3;">🔬 Welcome to JaaGee Lab</h2>
+    <p>Dear {{ name }},</p>
+    <p>Thank you for trusting JaaGee Lab with your sample analysis.</p>
+
+    <p><strong>🆔 Client ID:</strong> {{ client_id }}</p>
+    <p><strong>🔑 Access Token:</strong> {{ access_token }}</p>
+
+    <p>Click the button below to view your test results:</p>
+
+    <p style="text-align: center;">
+      <a href="{{ url }}" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+        View My Results
+      </a>
+    </p>
+
+    <p>If you have any issues accessing your portal, please reply to this email.</p>
+
+    <hr style="margin: 30px 0;">
+    <p style="font-size: 13px; color: #777;">JaaGee Lab | Accurate. Reliable. Trusted.</p>
+  </div>
+</body>
+</html>

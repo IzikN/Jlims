@@ -3,7 +3,9 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-from core.views import statistics_dashboard
+from core.views import statistics_dashboard, download_statistics_csv
+from core.views import submitted_results, generate_coa_pdf
+
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -21,6 +23,8 @@ urlpatterns = [
     path('equipment/log/', views.log_equipment_use, name='log_equipment_use'),
     path('coa/<int:client_id>/', views.view_coa, name='view_coa'),
     path('assign-test/<str:sample_id>/', views.assign_test, name='assign_test'),
+    path('dashboard/manager/results/', submitted_results, name='submitted_results'),
+    path('dashboard/manager/coa/<str:client_id>/', generate_coa_pdf, name='generate_coa'),
     path('dashboard/manager/', views.manager_dashboard, name='manager_dashboard'),
     path('dashboard/', views.dashboard_redirect, name='dashboard_redirect'),
     path('test-request/', views.create_test_request, name='create_test_request'),
@@ -30,9 +34,13 @@ urlpatterns = [
     path('api/test-parameters/', views.api_get_test_parameters, name='api_get_test_parameters'),
     path('ajax/load-samples/', views.load_samples, name='load_samples'),
     path('ajax/get-samples/', views.get_samples_for_parameter, name='ajax_get_samples'),
-    path('results/<str:token>/', views.view_client_results, name='client_results'),
-
+    path('results/', views.client_token_entry, name='client_token_entry'), 
+    path('results/<str:token>/', views.view_client_results, name='client_results'),  
     path('dashboard/manager/statistics/', statistics_dashboard, name='statistics_dashboard'),
+    path('client/<int:pk>/', views.client_submission_detail, name='client_submission_detail'),
+    path('download-statistics/', download_statistics_csv, name='download_statistics_csv'),
+
+
 
 
 

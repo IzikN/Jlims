@@ -1,37 +1,70 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% load static %}
 {% block content %}
-  <h2>Create Worksheet</h2>
-  <form method="post">
+<div class="max-w-3xl mx-auto bg-white shadow-md p-8 rounded">
+  <h2 class="text-2xl font-bold mb-6 text-blue-800">Create Worksheet</h2>
+
+  <form method="post" class="space-y-6">
     {% csrf_token %}
-    {{ form.title.label_tag }} {{ form.title }}
-    {{ form.test_parameter.label_tag }} {{ form.test_parameter }}
+
+    <div>
+      <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">
+        {{ form.title.label }}
+      </label>
+      {{ form.title|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" }}
+    </div>
+
+    <div>
+      <label for="{{ form.test_parameter.id_for_label }}" class="block text-sm font-medium text-gray-700">
+        {{ form.test_parameter.label }}
+      </label>
+      {{ form.test_parameter|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" }}
+    </div>
 
     <div id="assignment-container">
-      {{ form.assignments.label_tag }}
+      <label class="block text-sm font-medium text-gray-700 mb-1">Assignments</label>
       {% for checkbox in form.assignments %}
-        <div>{{ checkbox }}</div>
+        <div class="flex items-center space-x-2 mb-1">
+          {{ checkbox.tag }}
+          <label for="{{ checkbox.id_for_label }}" class="text-gray-600">{{ checkbox.choice_label }}</label>
+        </div>
+      {% empty %}
+        <p class="text-sm text-gray-500">No available assignments to select.</p>
       {% endfor %}
     </div>
 
-    <button type="submit">Create</button>
+    <button type="submit"
+      class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+      ➕ Create Worksheet
+    </button>
   </form>
+</div>
 
-  <script>
-    document.getElementById("id_test_parameter").addEventListener("change", function() {
-      const parameterId = this.value;
-      fetch(`/worksheet/filter-assignments/?parameter_id=${parameterId}`)
-        .then(response => response.json())
-        .then(data => {
-          const container = document.getElementById("assignment-container");
-          container.innerHTML = '<label for="id_assignments">Assignments</label>';
-          data.assignments.forEach(a => {
-            container.innerHTML += `
-              <div>
-                <input type="checkbox" name="assignments" value="${a.id}" id="id_assignments_${a.id}">
-                <label for="id_assignments_${a.id}">${a.label}</label>
-              </div>`;
-          });
+<script>
+  document.getElementById("id_test_parameter").addEventListener("change", function () {
+    const parameterId = this.value;
+    fetch(`/worksheet/filter-assignments/?parameter_id=${parameterId}`)
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById("assignment-container");
+        container.innerHTML = `<label class="block text-sm font-medium text-gray-700 mb-1">Assignments</label>`;
+
+        if (data.assignments.length === 0) {
+          container.innerHTML += `<p class="text-sm text-gray-500">No matching assignments found.</p>`;
+          return;
+        }
+
+        data.assignments.forEach(a => {
+          const checkboxHTML = `
+            <div class="flex items-center space-x-2 mb-1">
+              <input type="checkbox" name="assignments" value="${a.id}" id="id_assignments_${a.id}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+              <label for="id_assignments_${a.id}" class="text-gray-600">${a.label}</label>
+            </div>`;
+          container.innerHTML += checkboxHTML;
         });
-    });
-  </script>
+      });
+  });
+</script>
 {% endblock %}

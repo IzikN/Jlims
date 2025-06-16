@@ -1,0 +1,39 @@
+<!-- core/templates/core/submitted_results.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-6xl mx-auto bg-white shadow p-8 rounded mt-6">
+  <h2 class="text-2xl font-bold text-blue-800 mb-6">Submitted Test Results</h2>
+
+  {% if assignments %}
+  <table class="min-w-full table-auto border">
+    <thead>
+      <tr class="bg-gray-100 text-left">
+        <th class="px-4 py-2 border">Sample ID</th>
+        <th class="px-4 py-2 border">Parameter</th>
+        <th class="px-4 py-2 border">Analyst</th>
+        <th class="px-4 py-2 border">Result</th>
+        <th class="px-4 py-2 border">Unit</th>
+        <th class="px-4 py-2 border">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for assignment in assignments %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border">{{ assignment.sample.sample_id }}</td>
+          <td class="px-4 py-2 border">{{ assignment.parameter.name }}</td>
+          <td class="px-4 py-2 border">{{ assignment.assigned_to.username }}</td>
+          <td class="px-4 py-2 border">{{ assignment.result.value }}</td>
+          <td class="px-4 py-2 border">{{ assignment.result.unit }}</td>
+          <td class="px-4 py-2 border">
+            <a href="{% url 'generate_coa' assignment.sample.client.client_id %}"
+               class="text-blue-600 hover:underline">Generate COA</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No submitted results yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

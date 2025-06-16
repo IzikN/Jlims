@@ -1,20 +1,50 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Worksheet Entry: {{ worksheet.title }}</h2>
-<form method="post">
+<h2 class="mb-4">Worksheet Entry: {{ worksheet.title }}</h2>
+
+<form method="post" class="mb-4">
   {% csrf_token %}
-  <table>
-    <tr><th>Sample</th><th>Parameter</th><th>Value</th><th>Unit</th><th>Method</th></tr>
-    {% for assignment in assignments %}
-    <tr>
-      <td>{{ assignment.sample.sample_id }}</td>
-      <td>{{ assignment.parameter.name }}</td>
-      <td><input type="text" name="value_{{ assignment.id }}" required></td>
-      <td><input type="text" name="unit_{{ assignment.id }}" required></td>
-      <td><input type="text" name="method_{{ assignment.id }}" required></td>
-    </tr>
-    {% endfor %}
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>Sample ID</th>
+        <th>QC Flag</th>
+        <th>Parameter</th>
+        <th>Value</th>
+        <th>Unit</th>
+        <th>Method</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for assignment in assignments %}
+        <tr class="{% if assignment.sample.qc_flag == 'Control' %}table-warning{% elif assignment.sample.qc_flag == 'Duplicate' %}table-info{% endif %}">
+          <td>{{ assignment.sample.sample_id }}</td>
+          <td>
+            {% if assignment.sample.qc_flag == 'Control' %}
+              🧪 Control
+            {% elif assignment.sample.qc_flag == 'Duplicate' %}
+              📎 Duplicate
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ assignment.parameter.name }}</td>
+          <td>
+            <input type="number" step="0.01" name="value_{{ assignment.id }}" class="form-control" required placeholder="e.g. 5.67">
+          </td>
+          <td>
+            <input type="text" name="unit_{{ assignment.id }}" class="form-control" required placeholder="%">
+          </td>
+          <td>
+            <input type="text" name="method_{{ assignment.id }}" class="form-control" required placeholder="e.g. Soxhlet">
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="text-center">No assignments available.</td></tr>
+      {% endfor %}
+    </tbody>
   </table>
-  <button type="submit">Submit Results</button>
+  <button type="submit" class="btn btn-success">Submit Results</button>
+  <a href="{% url 'worksheet_list' %}" class="btn btn-secondary ml-2">Cancel</a>
 </form>
 {% endblock %}

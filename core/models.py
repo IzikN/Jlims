@@ -3,22 +3,39 @@ from django.contrib.auth.models import User
 from datetime import datetime, date, time
 import uuid
 
+
+def generate_client_id():
+    last_client = Client.objects.order_by('-id').first()
+    next_number = last_client.id + 1 if last_client else 1
+    return f"JGL2500-{next_number:02d}"  
+
+def generate_access_token():
+    return f"JGL-{uuid.uuid4().hex[:8].upper()}" 
+
 class Client(models.Model):
-    client_id = models.CharField(max_length=20, unique=True)
-    access_token = models.CharField(max_length=100, unique=True, default=uuid.uuid4)
-    name = models.CharField(max_length=100)
+    client_id = models.CharField(max_length=20, unique=True, editable=False)
+    access_token = models.CharField(max_length=100, unique=True, default=generate_access_token, editable=False)
     organization = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100)
     address = models.TextField(blank=True)
     phone = models.CharField(max_length=20)
     email = models.EmailField(blank=True)
     date_received = models.DateField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if not self.client_id:
+            self.client_id = generate_client_id()
+        if not self.access_token:
+            self.access_token = generate_access_token()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.client_id} - {self.name}"
 
 
+
 class Sample(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="samples")
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name="samples")
     requested_parameters = models.ManyToManyField('TestParameter', blank=True)
     batch = models.ForeignKey('Batch', on_delete=models.SET_NULL, null=True, blank=True, related_name='sample_set')
     sample_id = models.CharField(max_length=30)
@@ -104,6 +121,7 @@ class TestResult(models.Model):
     assignment = models.OneToOneField(TestAssignment, on_delete=models.CASCADE)
     value = models.DecimalField(max_digits=6, decimal_places=2)
     unit = models.CharField(max_length=20, default='%')
+    method = models.CharField(max_length=100, blank=True, null=True)  
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -168,7 +186,7 @@ class Reagent(models.Model):
 
 
 class Invoice(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey('Client', on_delete=models.CASCADE)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     date_issued = models.DateTimeField(auto_now_add=True)

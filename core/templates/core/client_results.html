@@ -1,17 +1,26 @@
-<h2>Results for {{ client.name }} ({{ client.client_id }})</h2>
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+  <h2 class="text-2xl font-bold text-blue-800 mb-4">Test Results for {{ client.name }}</h2>
+  <p class="mb-4"><strong>Client ID:</strong> {{ client.client_id }}</p>
+  <p><strong>Access Token:</strong> {{ client.access_token }}</p>
 
-{% for sample in samples %}
-    <h4>{{ sample.sample_id }}</h4>
-    <ul>
-        {% for assignment in sample.testassignment_set.all %}
-            <li>
-                {{ assignment.parameter.name }}: 
-                {% if assignment.testresult %}
-                    {{ assignment.testresult.value }}{{ assignment.testresult.unit }}
-                {% else %}
-                    Pending
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-{% endfor %}
+  <div class="mt-6 bg-white shadow p-4 rounded">
+    {% for sample in samples %}
+      <div class="border-b py-4">
+        <h3 class="text-lg font-semibold">{{ sample.sample_id }}</h3>
+        <p><strong>Nature:</strong> {{ sample.nature_of_sample }}</p>
+        <p><strong>Weight:</strong> {{ sample.weight }}g</p>
+        <p><strong>Requested Parameters:</strong></p>
+        <ul class="list-disc pl-6">
+          {% for param in sample.requested_parameters.all %}
+            <li>{{ param.name }}</li>
+          {% empty %}
+            <li>No parameters listed.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

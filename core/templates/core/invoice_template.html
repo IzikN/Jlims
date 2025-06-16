@@ -3,6 +3,11 @@
 <p>Client: {{ invoice.client.name }}</p>
 <p>Client ID: {{ invoice.client.client_id }}</p>
 <p>Date Issued: {{ invoice.date_issued }}</p>
+<a href="{{ MEDIA_URL }}invoices/Invoice_{{ invoice.invoice_number }}.pdf" 
+   class="text-blue-600 underline hover:text-blue-900" 
+   target="_blank">
+   📄 Download Invoice PDF
+</a>
 
 <table>
     <tr>

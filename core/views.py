@@ -12,6 +12,8 @@ from xhtml2pdf import pisa
 from django.utils import timezone
 from django.db.models import Count
 from core.utils import save_audit 
+from django.urls import reverse
+from .forms import ResultSubmissionForm
 import uuid
 from .models import AuditTrail
 from core.models import Invoice
@@ -29,7 +31,11 @@ from core.models import Client
 from django.db.models import Count, Sum
 from .models import Sample
 from datetime import datetime, timedelta
-
+from django.db.models.functions import TruncWeek, TruncMonth
+from django.utils.dateparse import parse_date
+import csv
+from .models import Invoice 
+from django.utils.timezone import now
 
 def is_manager(user):
     return user.groups.filter(name='Manager').exists()
@@ -53,7 +59,7 @@ def dashboard_redirect(request):
         return redirect('admin:index')
 
 def home(request):
-    client = Client.objects.first()  # Just for now
+    client = Client.objects.first()  
     return render(request, 'home.html', {'client': client})
 
 
@@ -105,13 +111,29 @@ def generate_invoice_pdf(request, invoice_id):
     return response
 
 def generate_coa_pdf(request, client_id):
-    test_request = get_object_or_404(TestRequest, client_id=client_id)
+    # Get the client
+    client = get_object_or_404(Client, client_id=client_id)
+
+    # Get all test results related to the client
+    results = TestResult.objects.filter(
+        assignment__sample__client__client_id=client_id
+    ).select_related('assignment__parameter', 'assignment__sample')
+
+    # Load template
     template = get_template('core/coa_template.html')
-    html = template.render({'request': test_request})
+    html = template.render({'client': client, 'results': results})
+
+    # Generate PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="COA_{client_id}.pdf"'
-    pisa.CreatePDF(html, dest=response)
-    save_audit(request.user, "Generated COA PDF", f"COA for Client ID {client_id}")  # ✅ audit
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse("Error generating COA PDF", status=500)
+
+    # Save audit
+    save_audit(request.user, "Generated COA PDF", f"COA for Client ID {client_id}")
+    
     return response
 
 @login_required
@@ -293,6 +315,14 @@ def view_client_results(request, token):
         'samples': samples,
     })
 
+def client_token_entry(request):
+    if request.method == 'POST':
+        token = request.POST.get('token')
+        if Client.objects.filter(access_token=token).exists():
+            return redirect('client_results', token=token)
+        else:
+            return render(request, 'core/token_entry.html', {'error': 'Invalid token.'})
+    return render(request, 'core/token_entry.html')
 
 
 @login_required
@@ -435,7 +465,7 @@ def submit_result(request, assignment_id):
     assignment = get_object_or_404(TestAssignment, id=assignment_id)
 
     if request.method == 'POST':
-        form = TestResultForm(request.POST)
+        form = ResultSubmissionForm(request.POST)
         if form.is_valid():
             result = form.save(commit=False)
             result.assignment = assignment
@@ -448,14 +478,22 @@ def submit_result(request, assignment_id):
             messages.success(request, "Result submitted successfully.")
             return redirect('analyst_dashboard')
     else:
-        form = TestResultForm()
+        form = ResultSubmissionForm()
 
     return render(request, 'core/submit_result.html', {'form': form, 'assignment': assignment})
 
+@login_required
+@user_passes_test(is_manager)
+def submitted_results(request):
+    assignments = TestAssignment.objects.filter(status='Completed').select_related('sample', 'parameter', 'assigned_to')
+    return render(request, 'core/submitted_results.html', {
+        'assignments': assignments
+    })
 
 @login_required
 @user_passes_test(is_manager)
 def manager_dashboard(request):
+    worksheets = Worksheet.objects.all().order_by('-created_at')[:5]
     clients = Client.objects.prefetch_related('samples').order_by('-date_received')
 
     total_samples = Sample.objects.count()
@@ -473,7 +511,7 @@ def manager_dashboard(request):
         'pending_tests': pending_tests,
         'equipment_status': equipment_status,
         'audit_trails': audit_trails,  # 👈 include in context
-        #**stats,
+        'worksheets': worksheets,
     }
 
     return render(request, 'core/manager_dashboard.html', context)
@@ -508,7 +546,7 @@ def assign_test(request, sample_id):
                 if form.cleaned_data:  # Avoid empty forms
                     TestAssignment.objects.create(
                         sample=sample,
-                        parameter=form.cleaned_data['parameter'],
+                        parameter=TestParameter.objects.get(pk=form.cleaned_data['parameter']),
                         assigned_to=form.cleaned_data['analyst'],
                         deadline=form.cleaned_data['deadline'],
                         status='Pending'
@@ -526,12 +564,13 @@ def assign_test(request, sample_id):
 
 
 
+
 @login_required
 @user_passes_test(is_cs)
 def create_test_request(request):
     if request.method == 'POST':
         client_form = ClientForm(request.POST)
-        
+
         if client_form.is_valid():
             client = client_form.save()
             posted_data = request.POST
@@ -554,18 +593,34 @@ def create_test_request(request):
                 for key in param_keys:
                     param_ids = posted_data.getlist(key)
                     for pid in param_ids:
-                        param_obj = TestParameter.objects.get(pk=pid)
-                        sample.requested_parameters.add(param_obj)
+                        try:
+                            param_obj = TestParameter.objects.get(pk=pid)
+                            sample.requested_parameters.add(param_obj)
+                        except TestParameter.DoesNotExist:
+                            continue
 
                 samples_created += 1
                 sample_index += 1
 
-            save_audit(request.user, "Created Test Request", f"Client ID {client.id} with {samples_created} sample(s)")
-            messages.success(request, "Test request successfully submitted.")
+            # ✅ Invoice created using helper
+            invoice = create_invoice_for_client(client)
+
+            # ✅ Save and email PDF
+            generate_invoice_pdf_and_email(invoice.id, request.user)
+
+            # ✅ Audit
+            save_audit(request.user, "Created Test Request", f"Client ID {client.client_id} with {samples_created} sample(s)")
+
+            # ✅ Message and redirect
+            messages.success(
+                request,
+                f"Test request submitted! Client ID: {client.client_id}, Token: {client.access_token}. "
+                f"<a href='{reverse('generate_invoice_pdf', args=[invoice.id])}' target='_blank' class='text-blue-600 underline'>Download Invoice PDF</a>"
+            )
             return redirect('cs_dashboard')
+
         else:
             messages.error(request, "Client information is invalid.")
-    
     else:
         client_form = ClientForm()
 
@@ -573,6 +628,16 @@ def create_test_request(request):
         'client_form': client_form
     })
 
+
+@login_required
+def client_submission_detail(request, pk):
+    client = get_object_or_404(Client, pk=pk)
+    samples = client.samples.prefetch_related('requested_parameters')
+
+    return render(request, 'core/client_submission_detail.html', {
+        'client': client,
+        'samples': samples,
+    })
 
 @login_required
 def api_get_test_parameters(request):
@@ -615,35 +680,44 @@ def statistics_dashboard(request):
         start = today - timedelta(days=30)
         end = today
 
-    samples = Sample.objects.filter(date__range=[start, end])
-    test_requests = TestRequest.objects.filter(date__range=[start, end])
+    # Get samples within date range based on Client's date_received field
+    samples = Sample.objects.filter(client__date_received__range=[start, end])
 
+    # 1. Total number of samples
     total_samples = samples.count()
-    total_amount = test_requests.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
+    # 2. Total amount: sum of all requested parameters' prices for these samples
+    total_amount = (
+        TestParameter.objects
+        .filter(sample__in=samples)
+        .aggregate(total=Sum('price'))['total']
+    ) or 0
+
+    # 3. Top 5 clients by total test charges
     top_clients = (
-        test_requests
-        .values('name')
-        .annotate(total=Sum('total_amount'))
+        samples
+        .values('client__name')
+        .annotate(total=Sum('requested_parameters__price'))
         .order_by('-total')[:5]
     )
 
+    # 4. Weekly revenue based on client's date_received
     weekly_revenue = (
-        test_requests
-        .extra({'week': "strftime('%%W', date)"})
+        samples
+        .annotate(week=TruncWeek('client__date_received'))
         .values('week')
-        .annotate(total=Sum('total_amount'))
-        .order_by('-total')
+        .annotate(total=Sum('requested_parameters__price'))
+        .order_by('-week')
     )
-
     highest_week = weekly_revenue[0] if weekly_revenue else None
 
+    # 5. Monthly revenue based on client's date_received
     monthly_revenue = (
-        test_requests
-        .extra({'month': "strftime('%%m', date)"})
+        samples
+        .annotate(month=TruncMonth('client__date_received'))
         .values('month')
-        .annotate(total=Sum('total_amount'))
-        .order_by('-total')
+        .annotate(total=Sum('requested_parameters__price'))
+        .order_by('-month')
     )
     highest_month = monthly_revenue[0] if monthly_revenue else None
 
@@ -656,4 +730,42 @@ def statistics_dashboard(request):
         'start_date': start.strftime('%Y-%m-%d'),
         'end_date': end.strftime('%Y-%m-%d'),
     }
+
     return render(request, 'core/statistics_dashboard.html', context)
+
+def download_statistics_csv(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        start = parse_date(start_date)
+        end = parse_date(end_date)
+    else:
+        end = datetime.today().date()
+        start = end - timedelta(days=30)
+
+    samples = Sample.objects.filter(client__date_received__range=[start, end])
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="jaagee_statistics_{start}_{end}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Client Name', 'Sample ID', 'Date Received', 'Test Parameter', 'Price'])
+
+    for sample in samples:
+        for param in sample.requested_parameters.all():
+            writer.writerow([
+                sample.client.name,
+                sample.sample_id,
+                sample.client.date_received.strftime('%Y-%m-%d'),
+                param.name,
+                param.price
+            ])
+
+    # Summary row (optional)
+    writer.writerow([])
+    writer.writerow(['Total Samples', samples.count()])
+    total = TestParameter.objects.filter(sample__in=samples).aggregate(total=Sum('price'))['total'] or 0
+    writer.writerow(['Total Revenue', f'₦{total}'])
+
+    return response

@@ -2,102 +2,351 @@
 {% load static %}
 
 {% block content %}
-<div class="p-6">
-    <h2 class="text-2xl font-bold mb-6">Manager Dashboard</h2>
-
-    <!-- Quick Actions -->
-    <div class="flex flex-wrap gap-4 mb-8">
-        <a href="{% url 'create_batch' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ New Batch</a>
-        <a href="{% url 'batch_list' %}" class="bg-blue-100 text-blue-800 px-4 py-2 rounded hover:bg-blue-200">Batch List</a>
-        <a href="{% url 'create_worksheet' %}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">+ New Worksheet</a>
-        <a href="{% url 'worksheet_list' %}" class="bg-green-100 text-green-800 px-4 py-2 rounded hover:bg-green-200">Worksheet List</a>
-        <a href="{% url 'view_coa' client_id=1 %}" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">View COA</a>
-        <a href="{% url 'statistics_dashboard' %}" 
-   class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mt-4">
-   📊 View Statistics
-</a>
-
-    </div>
-
-    <!-- Clients & Samples Section -->
-    <div class="mb-10">
-        <h3 class="text-xl font-semibold mb-4">Clients & Samples</h3>
-        {% for client in clients %}
-            <div class="bg-white shadow p-4 mb-4 rounded">
-                <h4 class="text-lg font-medium">{{ client.client_id }} - {{ client.name }}</h4>
-                <ul class="ml-4 mt-2">
-                    {% for sample in client.samples.all %}
-                        <li class="border-b py-2">
-                            <span class="font-semibold">{{ sample.sample_id }}</span> —
-                            {{ sample.nature_of_sample }} —
-                            {{ sample.weight }}g
-
-                            {% if sample.testassignment_set.count == 0 %}
-                                <a href="{% url 'assign_test' sample.sample_id %}" class="ml-4 text-blue-600 hover:underline">Assign Test</a>
-                            {% else %}
-                                <span class="ml-4 text-green-600 font-semibold">Test Assigned</span>
-                            {% endif %}
-
-                            {% if sample.batch %}
-                                <a href="{% url 'batch_detail' sample.batch.id %}" class="ml-4 text-purple-600 hover:underline">View Batch QC</a>
-                            {% else %}
-                                <span class="ml-4 text-gray-500 italic">No Batch</span>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% empty %}
-            <p>No clients found.</p>
-        {% endfor %}
-    </div>
-
-    <!-- Lab Summary -->
-    <div class="bg-white shadow p-4 mb-8 rounded">
-        <h3 class="text-xl font-semibold mb-4">Lab Summary</h3>
-        <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <li class="bg-blue-100 p-3 rounded">🧪 Total Samples: <strong>{{ total_samples }}</strong></li>
-            <li class="bg-green-100 p-3 rounded">✅ Tests Completed: <strong>{{ completed_tests }}</strong></li>
-            <li class="bg-yellow-100 p-3 rounded">⏳ Pending Tests: <strong>{{ pending_tests }}</strong></li>
-        </ul>
-        <div class="mt-4">
-            <h4 class="font-semibold">Equipment Status:</h4>
-            <ul class="ml-4 list-disc">
-                {% for e in equipment_status %}
-                    <li>{{ e.status }}: <strong>{{ e.count }}</strong></li>
-                {% endfor %}
-            </ul>
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">Manager Dashboard</h2>
+            <p class="text-gray-600 mt-1">Welcome back! Here's what's happening in your lab today.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="h-3 w-3 rounded-full bg-green-500 animate-pulse"></span>
+            <span class="text-sm text-gray-600">System Online</span>
         </div>
     </div>
 
-    <!-- Audit Trail -->
-    <div class="bg-white shadow p-4 rounded">
-        <h3 class="text-xl font-semibold mb-4">Recent Activities</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border rounded text-sm">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="py-2 px-4 border">User</th>
-                        <th class="py-2 px-4 border">Action</th>
-                        <th class="py-2 px-4 border">Details</th>
-                        <th class="py-2 px-4 border">Timestamp</th>
-                    </tr>
-                </thead>
-                <tbody>
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Samples</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ total_samples }}</h3>
+                </div>
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Tests Completed</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ completed_tests }}</h3>
+                </div>
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Pending Tests</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ pending_tests }}</h3>
+                </div>
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Active Clients</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ clients|length }}</h3>
+                </div>
+                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                    Quick Actions
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <a href="{% url 'create_batch' %}" class="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                        </svg>
+                        <span>New Batch</span>
+                    </a>
+                    <a href="{% url 'batch_list' %}" class="flex items-center justify-center space-x-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span>Batch List</span>
+                    </a>
+                    <a href="{% url 'create_worksheet' %}" class="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                        </svg>
+                        <span>New Worksheet</span>
+                    </a>
+                    <a href="{% url 'worksheet_list' %}" class="flex items-center justify-center space-x-2 bg-green-100 hover:bg-green-200 text-green-800 px-4 py-3 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span>Worksheet List</span>
+                    </a>
+                    <a href="{% url 'view_coa' client_id=1 %}" class="flex items-center justify-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>View COA</span>
+                    </a>
+                    <a href="{% url 'statistics_dashboard' %}" class="flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>View Statistics</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Worksheets -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clip-rule="evenodd" />
+                        </svg>
+                        Recent Worksheets
+                    </h3>
+                    <a href="{% url 'submitted_results' %}" class="text-sm flex items-center text-blue-600 hover:text-blue-800">
+                        View All Results
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="overflow-hidden">
+                    <ul class="divide-y divide-gray-200">
+                        {% for worksheet in worksheets %}
+                            <li class="py-3 hover:bg-gray-50 px-2 rounded transition-colors">
+                                <a href="{% url 'worksheet_detail' worksheet.id %}" class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">{{ worksheet.title }}</h4>
+                                        <p class="text-sm text-gray-500 mt-1">{{ worksheet.description|truncatechars:60 }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">{{ worksheet.status }}</span>
+                                        <p class="text-xs text-gray-500 mt-1">{{ worksheet.created_at|date:"M d, Y H:i" }}</p>
+                                    </div>
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="text-center py-6 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <p class="mt-2">No worksheets available yet</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Clients & Samples Section -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Clients & Samples
+                </h3>
+                {% if clients %}
+                    <div class="space-y-4">
+                        {% for client in clients %}
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between items-center">
+                                    <h4 class="font-medium text-gray-900">{{ client.client_id }} - {{ client.name }}</h4>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{{ client.samples.all.count }} samples</span>
+                                </div>
+                                <ul class="divide-y divide-gray-200">
+                                    {% for sample in client.samples.all %}
+                                        <li class="px-4 py-3">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <span class="font-semibold">{{ sample.sample_id }}</span>
+                                                    <div class="text-sm text-gray-600 mt-1">
+                                                        <span class="inline-block mr-3">{{ sample.nature_of_sample }}</span>
+                                                        <span class="inline-block">{{ sample.weight }}g</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex space-x-2">
+                                                    {% if sample.testassignment_set.count == 0 %}
+                                                        <a href="{% url 'assign_test' sample.sample_id %}" class="text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full inline-flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                            </svg>
+                                                            Assign Test
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full inline-flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Test Assigned
+                                                        </span>
+                                                    {% endif %}
+
+                                                    {% if sample.batch %}
+                                                        <a href="{% url 'batch_detail' sample.batch.id %}" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-2 py-1 rounded-full inline-flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            View QC
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">No Batch</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-6 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <p class="mt-2">No clients found</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-8">
+            <!-- Lab Summary -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    Lab Summary
+                </h3>
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 rounded-full bg-blue-100 text-blue-600 mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Total Samples</p>
+                                <p class="text-xl font-semibold">{{ total_samples }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 rounded-full bg-green-100 text-green-600 mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tests Completed</p>
+                                <p class="text-xl font-semibold">{{ completed_tests }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 rounded-full bg-yellow-100 text-yellow-600 mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Pending Tests</p>
+                                <p class="text-xl font-semibold">{{ pending_tests }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <h4 class="font-semibold mb-3 flex items-center text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Equipment Status
+                    </h4>
+                    <ul class="space-y-2">
+                        {% for e in equipment_status %}
+                            <li class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">{{ e.status }}</span>
+                                <span class="font-medium">{{ e.count }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Audit Trail -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Recent Activities
+                </h3>
+                <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
                     {% for audit in audit_trails %}
-                        <tr class="hover:bg-gray-100">
-                            <td class="py-2 px-4 border">{{ audit.user.username }}</td>
-                            <td class="py-2 px-4 border">{{ audit.action }}</td>
-                            <td class="py-2 px-4 border">{{ audit.details }}</td>
-                            <td class="py-2 px-4 border">{{ audit.timestamp|date:"d M Y H:i" }}</td>
-                        </tr>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                                    {{ audit.user.username|first|upper }}
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">{{ audit.user.username }}</p>
+                                <p class="text-sm text-gray-600">{{ audit.action }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ audit.timestamp|timesince }} ago</p>
+                            </div>
+                        </div>
                     {% empty %}
-                        <tr>
-                            <td colspan="4" class="py-4 text-center text-gray-500">No audit trail records found.</td>
-                        </tr>
+                        <div class="text-center py-6 text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="mt-2">No recent activities</p>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

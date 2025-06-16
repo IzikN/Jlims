@@ -10,6 +10,7 @@
            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow">
             + New Test Request
         </a>
+
     </div>
 
     <!-- Search and Filters -->
@@ -33,6 +34,8 @@
         {% if clients %}
             <ul class="space-y-3">
                 {% for client in clients %}
+                <a href="{% url 'client_submission_detail' client.pk %}" class="text-blue-600 hover:underline">View Details</a>
+
                     <li class="p-3 bg-gray-50 rounded hover:bg-gray-100 transition">
                         <div class="flex justify-between items-center">
                             <div>

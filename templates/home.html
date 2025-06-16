@@ -2,88 +2,146 @@
 {% load static %}
 
 {% block content %}
-<div class="bg-gradient-to-b from-blue-50 to-white min-h-screen flex items-center justify-center py-12">
-    <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-2xl text-center">
-        <!-- Logo Placeholder -->
-        <img src="{% static 'images/logo.jpg' %}" alt="JaaGee Laboratory Logo" class="mx-auto h-20 mb-6" />
+<!-- Animated Background Gradient -->
+<div class="bg-gradient-to-br from-blue-50 via-white to-blue-100 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 animate-gradient">
+    <!-- Glassmorphism Card -->
+    <div class="max-w-6xl w-full bg-white/90 backdrop-blur-lg p-8 sm:p-12 rounded-2xl shadow-2xl text-center border border-white/20 transform transition-all hover:shadow-3xl">
+        <!-- Logo with Bounce Animation -->
+        <img src="{% static 'images/logo.jpg' %}" alt="JaaGee Laboratory Logo" class="mx-auto h-24 mb-6 hover:animate-bounce" />
 
-        <!-- Header -->
-        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4">JaaGee Laboratory LIMS</h1>
-        <p class="text-xl text-gray-600 mb-8">Your Trusted Partner in Food and Feed Analysis</p>
+        <!-- Header with Text Glow -->
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4 text-shadow-lg">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-900">JaaGee Laboratory LIMS</span>
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 font-medium">Your Trusted Partner in <span class="text-blue-700 font-semibold">Precision Food & Feed Analysis</span></p>
 
-        <!-- Certification Badge -->
-        <div class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-            ISO/IEC 17025:2017 Certified Laboratory
+        <!-- Pulsing Certification Badge -->
+        <div class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-6 animate-pulse hover:animate-none">
+            ⭐ ISO/IEC 17025:2017 Certified Laboratory
         </div>
 
-        <!-- Introduction -->
-        <p class="text-lg text-gray-700 mb-10 leading-relaxed">
-            At JaaGee Laboratory, we deliver precise, reliable, and timely analytical services for food and feed industries. 
-            Our state-of-the-art facilities and expert team ensure compliance with global standards, empowering our clients with confidence in their results.
+        <!-- Introduction with Fade-In -->
+        <p class="text-lg text-gray-700 mb-10 leading-relaxed animate-fade-in">
+            At <span class="font-bold text-blue-800">JaaGee Laboratory</span>, we deliver <span class="font-semibold">precise, reliable, and timely</span> analytical services for food and feed industries. 
+            Our <span class="underline">state-of-the-art facilities</span> and expert team ensure compliance with global standards, empowering our clients with <span class="italic">confidence in every result</span>.
         </p>
 
-        <!-- Scope of Services -->
+        <!-- Scope of Services - Animated Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div class="bg-gray-50 p-6 rounded-lg">
-                <h3 class="text-xl font-semibold text-blue-800 mb-2">Current Scope</h3>
-                <ul class="text-gray-600 text-left list-disc list-inside">
-                    <li>Protein Analysis</li>
-                    <li>Ash Content</li>
-                    <li>Moisture Determination</li>
-                    <li>Fiber Analysis</li>
-                    <li>Fat Content</li>
-                    <li>Gross Energy</li>
-                    <li>Aflatoxin Testing</li>
-                    <li>Vitamin Analysis</li>
+            <!-- Current Scope (Hover Scale Effect) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-blue-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
+                <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center justify-center gap-2">
+                    <i class="fas fa-flask text-blue-600"></i> Current Scope
+                </h3>
+                <ul class="text-gray-600 text-left space-y-2">
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Protein Analysis</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Ash Content</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Moisture Determination</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Fiber Analysis</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Fat Content</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Gross Energy</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Aflatoxin Testing</li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Vitamin Analysis</li>
                 </ul>
             </div>
-            <div class="bg-gray-50 p-6 rounded-lg">
-                <h3 class="text-xl font-semibold text-blue-800 mb-2">Future Scope Expansion</h3>
-                <ul class="text-gray-600 text-left list-disc list-inside">
-                    <li>Water Quality Testing</li>
-                    <li>Microbial Analysis</li>
+            
+            <!-- Future Scope (Hover Scale Effect) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-blue-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
+                <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center justify-center gap-2">
+                    <i class="fas fa-rocket text-purple-600"></i> Future Expansion
+                </h3>
+                <ul class="text-gray-600 text-left space-y-2">
+                    <li class="flex items-center"><i class="fas fa-hourglass-half text-yellow-500 mr-2"></i> Water Quality Testing</li>
+                    <li class="flex items-center"><i class="fas fa-hourglass-half text-yellow-500 mr-2"></i> Microbial Analysis</li>
                 </ul>
+                <p class="mt-4 text-sm text-blue-600 italic">Coming soon! Stay tuned for updates.</p>
             </div>
         </div>
 
-        <!-- Call to Action Links -->
-        <div class="flex justify-center gap-6 mb-10">
-            <a href="{% url 'client_results' token=sample.token %}
-" class="text-blue-700 font-semibold hover:text-blue-900 transition duration-300">
-                View Your Results
+        <!-- Call to Action Buttons (Glow on Hover) -->
+        <div class="flex flex-wrap justify-center gap-4 mb-10">
+            <a href="{% url 'client_token_entry' %}" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all hover:ring-2 hover:ring-blue-400">
+                <i class="fas fa-chart-line mr-2"></i> View Your Results
             </a>
-            <span class="text-gray-400">|</span>
-            <a href="{% url 'login' %}" class="text-blue-700 font-semibold hover:text-blue-900 transition duration-300">
-                Staff Login
+            <a href="{% url 'login' %}" class="px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg font-semibold shadow-sm hover:bg-blue-50 hover:shadow-md transition-all">
+                <i class="fas fa-lock mr-2"></i> Staff Login
             </a>
         </div>
 
-        <!-- Why Choose Us -->
-        <div class="bg-blue-900 text-white p-8 rounded-lg">
-            <h2 class="text-2xl font-bold mb-4">Why Choose JaaGee Laboratory?</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <h4 class="font-semibold mb-2">Accredited Excellence</h4>
-                    <p class="text-sm">ISO 17025 certification ensures our results meet international standards.</p>
+        <!-- Why Choose Us (Glowing Panel) -->
+        <div class="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-8 rounded-xl shadow-inner">
+            <h2 class="text-2xl font-bold mb-6 text-center">Why Choose <span class="text-yellow-300">JaaGee Laboratory?</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm hover:bg-white/20 transition-all">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-award text-3xl text-yellow-300"></i>
+                    </div>
+                    <h4 class="font-bold mb-2 text-lg">Accredited Excellence</h4>
+                    <p class="text-sm opacity-90">ISO 17025 certification ensures globally recognized results.</p>
                 </div>
-                <div>
-                    <h4 class="font-semibold mb-2">Cutting-Edge Technology</h4>
-                    <p class="text-sm">Advanced equipment for precise and reliable analysis.</p>
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm hover:bg-white/20 transition-all">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-microscope text-3xl text-yellow-300"></i>
+                    </div>
+                    <h4 class="font-bold mb-2 text-lg">Cutting-Edge Tech</h4>
+                    <p class="text-sm opacity-90">Advanced equipment for unmatched precision.</p>
                 </div>
-                <div>
-                    <h4 class="font-semibold mb-2">Expert Team</h4>
-                    <p class="text-sm">Highly trained professionals dedicated to quality and service.</p>
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm hover:bg-white/20 transition-all">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-users text-3xl text-yellow-300"></i>
+                    </div>
+                    <h4 class="font-bold mb-2 text-lg">Expert Team</h4>
+                    <p class="text-sm opacity-90">Highly trained professionals ensuring quality.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Footer Note -->
-        <p class="text-gray-500 text-sm mt-10">
-            &copy; 2025 JaaGee Laboratory. All rights reserved.
-        </p>
+        <!-- Testimonial Carousel (Optional) -->
+        <div class="mt-10 bg-gray-50 p-6 rounded-xl">
+            <h3 class="text-xl font-semibold text-blue-800 mb-4">What Our Clients Say</h3>
+            <div class="text-gray-600 italic">
+                <p>"JaaGee Laboratory's reports are incredibly detailed and reliable. Highly recommended!"</p>
+                <p class="mt-2 text-right text-sm font-medium">— ABC Food Industries</p>
+            </div>
+        </div>
+
+        <!-- Footer with Social Links -->
+        <div class="mt-12 pt-6 border-t border-gray-200">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fab fa-linkedin fa-lg"></i></a>
+                <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fab fa-twitter fa-lg"></i></a>
+                <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fab fa-facebook fa-lg"></i></a>
+            </div>
+            <p class="text-gray-500 text-sm">
+                &copy; 2025 <span class="font-semibold">JaaGee Laboratory</span>. All rights reserved.
+            </p>
+        </div>
     </div>
 </div>
 
-<!-- Tailwind CSS CDN -->
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Custom Animations -->
+<style>
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .animate-gradient {
+        background-size: 200% 200%;
+        animation: gradient 10s ease infinite;
+    }
+    .animate-fade-in {
+        animation: fadeIn 1.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .text-shadow-lg {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
 {% endblock %}

@@ -68,32 +68,36 @@ class EquipmentLogForm(forms.ModelForm):
             field.widget.attrs.update({'class': 'form-control'})
 
 
-
 class ResultSubmissionForm(forms.ModelForm):
     class Meta:
         model = TestResult
-        fields = ['value', 'unit']
+        fields = ['value', 'unit', 'method']  # ✅ Include 'method'
         widgets = {
             'value': forms.NumberInput(attrs={'step': '0.01', 'placeholder': 'Enter result'}),
             'unit': forms.TextInput(attrs={'placeholder': '% or mg/kg'}),
+            'method': forms.TextInput(attrs={'placeholder': 'Enter method used'}),
         }
+
 
         
 
 class AssignTestForm(forms.Form):
-    parameter = forms.ModelChoiceField(
-        queryset=TestParameter.objects.all(),
-        label="Test Parameter"
-    )
-    analyst = forms.ModelChoiceField(
-        queryset=User.objects.filter(groups__name='Analyst'),
-        label="Assign to Analyst"
-    )
-    deadline = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}),
-        label="Deadline"
-    )
+    parameter = forms.ChoiceField(label="Parameter")
+    analyst = forms.ModelChoiceField(queryset=User.objects.filter(groups__name='Analyst'), label="Analyst")
+    deadline = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Group parameters by test_type
+        grouped = {}
+        for param in TestParameter.objects.select_related('test_type').all():
+            group = param.test_type.name if param.test_type else "Others"
+            grouped.setdefault(group, []).append((param.id, param.name))
+
+        # Convert grouped dict to tuple structure Django expects
+        grouped_choices = [(group, items) for group, items in grouped.items()]
+        self.fields['parameter'].choices = grouped_choices
 
 AssignTestFormSet = formset_factory(AssignTestForm, extra=1)
 
@@ -101,7 +105,14 @@ AssignTestFormSet = formset_factory(AssignTestForm, extra=1)
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ['client_id', 'name', 'organization', 'address', 'email', 'phone']
+        fields = ['name', 'organization', 'address', 'email', 'phone']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'organization': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 class SampleForm(forms.ModelForm):
     class Meta:

@@ -1,10 +1,14 @@
 from django.contrib import admin
 from .models import *
 
+from django.contrib import admin
+from .models import Client
+
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ['client_id', 'name', 'phone', 'date_received']
-    search_fields = ['client_id', 'name']
+    readonly_fields = ('client_id', 'access_token')
+    list_display = ('client_id', 'name', 'organization', 'access_token', 'date_received')
+
 
 @admin.register(Sample)
 class SampleAdmin(admin.ModelAdmin):
