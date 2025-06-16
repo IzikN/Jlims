@@ -1,1 +1,1 @@
-web: gunicorn jaagee_lims.wsgi
+gunicorn jaagee_lims.wsgi
